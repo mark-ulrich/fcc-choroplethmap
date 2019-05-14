@@ -1,43 +1,70 @@
-const fillColors = ['blue', 'red', 'purple', 'orange'];
+const fillColors = [
+  '#f7fbff',
+  '#deebf7',
+  '#c6dbef',
+  '#9ecae1',
+  '#6baed6',
+  '#4292c6',
+  '#2171b5',
+  '#08519c',
+  '#08306b'
+];
+
+const thresholds = [3, 12, 21, 30, 39, 48, 57, 66];
 
 window.addEventListener('DOMContentLoaded', (e) => {
   getData();
 });
 
-const drawGraph = (topojsonData, educationData) => {
+const drawGraph = (topographyData, educationData) => {
   const chartTitle = 'United States Educational Attainment';
   const chartDescription =
     "Percentage of adults age 25 and older with a bachelor's degree or higher (2010-2014)";
 
   const chartDimensions = {
-    width: 1000,
-    height: 600,
+    width: 1200,
+    height: 1000,
     padding: { top: 100, bottom: 100, right: 100, left: 100 }
   };
 
-  const titleX = 215;
-  const titleY = 50;
-  const descriptionX = 220;
-  const descriptionY = 75;
+  const titleX = 250;
+  const titleY = 60;
+  const descriptionX = 160;
+  const descriptionY = 90;
 
   const svg = createSVG(chartDimensions);
   drawTitle(svg, titleX, titleY, chartTitle);
   drawDescription(svg, descriptionX, descriptionY, chartDescription);
+  drawMap(svg, topographyData, educationData);
 
-  const { geoCounties } = getGeoJSON(topojsonData);
+  drawLegend(svg);
+};
+
+const drawMap = (svg, topographyData, educationData) => {
+  const { geoCounties } = getGeoJSON(topographyData);
 
   svg
+    .append('svg')
+    .attr('id', 'map-svg')
+    .attr('y', 130)
+    .attr('x', 25)
     .selectAll('path')
     .data(geoCounties.features)
     .enter()
     .append('path')
+    .attr('transform', 'scale(1.2)')
     .attr('d', d3.geoPath())
     .attr('class', 'county')
-    .attr('fill', (d) => {
-      // TODO: choose fill color based on education data
-    });
-
-  // drawLegend(svg);
+    .attr('fill', (d) =>
+      getFillColor(educationData.filter((county) => county.fips === d.id)[0])
+    )
+    .attr('data-fips', (d) => d.id)
+    .attr(
+      'data-education',
+      (d) =>
+        educationData.filter((county) => county.fips === d.id)[0]
+          .bachelorsOrHigher
+    );
 };
 
 const getGeoJSON = (topojsonData) => {
@@ -86,14 +113,14 @@ const makeJSONRequest = (url) => {
 };
 
 const getData = async () => {
-  const countyDataURL =
+  const topographyDataURL =
     'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json';
   const educationDataURL =
     'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json';
 
   try {
     const data = await Promise.all([
-      makeJSONRequest(countyDataURL),
+      makeJSONRequest(topographyDataURL),
       makeJSONRequest(educationDataURL)
     ]);
     return drawGraph(data[0], data[1]);
@@ -102,56 +129,56 @@ const getData = async () => {
   }
 };
 
-const getFillColor = (temp) => {
-  if (temp >= 12.8) {
-    return cellColors[10];
-  } else if (temp >= 11.7) {
-    return cellColors[9];
-  } else if (temp >= 10.6) {
-    return cellColors[8];
-  } else if (temp >= 9.5) {
-    return cellColors[7];
-  } else if (temp >= 8.3) {
-    return cellColors[6];
-  } else if (temp >= 7.2) {
-    return cellColors[5];
-  } else if (temp >= 6.1) {
-    return cellColors[4];
-  } else if (temp >= 5.0) {
-    return cellColors[3];
-  } else if (temp >= 3.9) {
-    return cellColors[2];
-  } else if (temp >= 2.8) {
-    return cellColors[1];
-  } else return cellColors[0];
+const getFillColor = (educationData) => {
+  const degreePct = educationData.bachelorsOrHigher;
+  if (degreePct >= thresholds[7]) {
+    // console.log(typeof degreePct, degreePct);
+    // console.log(typeof thresholds[7], thresholds[7]);
+    return fillColors[8];
+  } else if (degreePct >= thresholds[6]) {
+    return fillColors[7];
+  } else if (degreePct >= thresholds[5]) {
+    return fillColors[6];
+  } else if (degreePct >= thresholds[4]) {
+    return fillColors[5];
+  } else if (degreePct >= thresholds[3]) {
+    return fillColors[4];
+  } else if (degreePct >= thresholds[2]) {
+    return fillColors[3];
+  } else if (degreePct >= thresholds[1]) {
+    return fillColors[2];
+  } else if (degreePct >= thresholds[0]) {
+    return fillColors[1];
+  } else return fillColors[0];
 };
 
 const drawLegend = (svg) => {
-  const legendBoxWidth = 40;
+  const legendBoxWidth = 25;
+  const offset = { x: 800, y: 150 };
 
   const legend = svg.append('svg').attr('id', 'legend');
 
-  const legendScale = d3
-    .scaleOrdinal()
-    .domain([2.8, 3.9, 5.0, 6.1, 7.2, 8.3, 9.5, 10.6, 11.7, 12.8]);
-  // .range(100, 100 + 11 * legendBoxWidth);
+  const legendScale = d3.scaleOrdinal().domain(thresholds);
   legendScale.range(
-    legendScale.domain().map((val, i) => 100 + i * legendBoxWidth)
+    legendScale.domain().map((val, i) => offset.x + i * legendBoxWidth)
   );
-  const axis = d3.axisBottom(legendScale);
+  const legendAxis = d3.axisBottom(legendScale);
   legend
     .append('g')
-    .attr('transform', `translate(${legendBoxWidth - 0.5},540)`)
-    .call(axis);
+    .attr(
+      'transform',
+      `translate(${legendBoxWidth - 0.5}, ${offset.y + legendBoxWidth})`
+    )
+    .call(legendAxis);
 
   legend
     .selectAll('rect')
-    .data(cellColors)
+    .data(fillColors)
     .enter()
     .append('rect')
     .attr('stroke', '#333')
-    .attr('x', (d, i) => 100 + legendBoxWidth * i)
-    .attr('y', 500)
+    .attr('x', (d, i) => offset.x + legendBoxWidth * i)
+    .attr('y', offset.y)
     .attr('fill', (d) => d)
     .attr('width', legendBoxWidth)
     .attr('height', legendBoxWidth);
