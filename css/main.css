@@ -61,12 +61,12 @@ body {
 
   background: #2171b5;
   color: #ddd;
-  opacity: 0.85;
+  opacity: 0.9;
 
   text-align: center;
   line-height: 1.5rem;
 
-  box-shadow: 0 0 6px 3px #333;
+  box-shadow: 0 0 6px 3px #08519c;
 
   font-family: 'Lato', sans-serif;
   font-size: 1rem;

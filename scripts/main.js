@@ -44,11 +44,14 @@ const drawGraph = (topographyData, educationData) => {
 const drawMap = (svg, topographyData, educationData) => {
   const { geoCounties } = getGeoJSON(topographyData);
 
-  svg
+  const mapSvg = svg
     .append('svg')
     .attr('id', 'map-svg')
     .attr('y', 130)
-    .attr('x', 25)
+    .attr('x', 25);
+
+  // Draw counties
+  mapSvg
     .selectAll('path')
     .data(geoCounties.features)
     .enter()
@@ -68,13 +71,28 @@ const drawMap = (svg, topographyData, educationData) => {
       'data-state',
       (d) => educationData.filter((county) => county.fips === d.id)[0].state
     )
-
     .attr(
       'data-education',
       (d) =>
         educationData.filter((county) => county.fips === d.id)[0]
           .bachelorsOrHigher
     );
+
+  // Draw state outlines
+  mapSvg
+    .append('path')
+    .datum(
+      topojson.mesh(
+        topographyData,
+        topographyData.objects.states,
+        (a, b) => a !== b
+      )
+    )
+    .attr('fill', 'none')
+    .attr('stroke', fillColors[0])
+    .attr('stroke-linkjoin', 'round')
+    .attr('transform', 'scale(1.2)')
+    .attr('d', d3.geoPath());
 };
 
 const getGeoJSON = (topojsonData) => {
