@@ -43,11 +43,11 @@ body {
   font-weight: 300;
 }
 
-.cell {
+.county {
   cursor: pointer;
 }
-.cell:hover {
-  stroke: #333;
+.county:hover {
+  /* stroke: #333; */
 }
 
 #tooltip {

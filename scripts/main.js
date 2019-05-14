@@ -1,8 +1,10 @@
+const fillColors = ['blue', 'red', 'purple', 'orange'];
+
 window.addEventListener('DOMContentLoaded', (e) => {
   getData();
 });
 
-const drawGraph = (countyData, educationData) => {
+const drawGraph = (topojsonData, educationData) => {
   const chartTitle = 'United States Educational Attainment';
   const chartDescription =
     "Percentage of adults age 25 and older with a bachelor's degree or higher (2010-2014)";
@@ -22,7 +24,30 @@ const drawGraph = (countyData, educationData) => {
   drawTitle(svg, titleX, titleY, chartTitle);
   drawDescription(svg, descriptionX, descriptionY, chartDescription);
 
+  const { geoCounties } = getGeoJSON(topojsonData);
+
+  svg
+    .selectAll('path')
+    .data(geoCounties.features)
+    .enter()
+    .append('path')
+    .attr('d', d3.geoPath())
+    .attr('class', 'county')
+    .attr('fill', (d) => {
+      // TODO: choose fill color based on education data
+    });
+
   // drawLegend(svg);
+};
+
+const getGeoJSON = (topojsonData) => {
+  const geoNation = topojson.feature(topojsonData, topojsonData.objects.nation);
+  const geoStates = topojson.feature(topojsonData, topojsonData.objects.states);
+  const geoCounties = topojson.feature(
+    topojsonData,
+    topojsonData.objects.counties
+  );
+  return { geoNation, geoStates, geoCounties };
 };
 
 const createSVG = (chartDimensions) =>
