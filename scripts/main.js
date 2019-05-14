@@ -38,6 +38,7 @@ const drawGraph = (topographyData, educationData) => {
   drawMap(svg, topographyData, educationData);
 
   drawLegend(svg);
+  initMapEventHandlers();
 };
 
 const drawMap = (svg, topographyData, educationData) => {
@@ -59,6 +60,15 @@ const drawMap = (svg, topographyData, educationData) => {
       getFillColor(educationData.filter((county) => county.fips === d.id)[0])
     )
     .attr('data-fips', (d) => d.id)
+    .attr(
+      'data-county',
+      (d) => educationData.filter((county) => county.fips === d.id)[0].area_name
+    )
+    .attr(
+      'data-state',
+      (d) => educationData.filter((county) => county.fips === d.id)[0].state
+    )
+
     .attr(
       'data-education',
       (d) =>
@@ -86,14 +96,16 @@ const createSVG = (chartDimensions) =>
     .attr('class', 'chart');
 
 const displayTooltip = (mouseCoords, data) => {
-  const offset = { x: 20, y: -20 };
+  const offset = { x: 20, y: 20 };
 
   const tooltip = document.getElementById('tooltip');
   tooltip.style.left = `${mouseCoords.x + offset.x}px`;
   tooltip.style.top = `${mouseCoords.y + offset.y}px`;
   tooltip.style.visibility = 'visible';
+  tooltip.setAttribute('data-education', data.education);
 
   let markup = `
+  <strong>${data.county}, ${data.state}: ${data.education}%</strong>
   `;
 
   tooltip.innerHTML = markup;
@@ -185,10 +197,16 @@ const drawLegend = (svg) => {
 };
 
 const initMapEventHandlers = () => {
-  const counties = document.querySelectorAll('.cell');
+  const counties = document.querySelectorAll('.county');
   counties.forEach((county) => {
     county.addEventListener('mouseover', (e) => {
-      displayTooltip({ x: e.clientX, y: e.clientY });
+      const county = e.target.getAttribute('data-county');
+      const state = e.target.getAttribute('data-state');
+      const education = e.target.getAttribute('data-education');
+      displayTooltip(
+        { x: e.clientX, y: e.clientY },
+        { county, state, education }
+      );
     });
     county.addEventListener('mouseleave', (e) => {
       const tooltip = document.getElementById('tooltip');

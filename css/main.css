@@ -59,7 +59,7 @@ body {
   border: 1px solid #333;
   border-radius: 4px;
 
-  background: #333;
+  background: #2171b5;
   color: #ddd;
   opacity: 0.85;
 
@@ -70,5 +70,5 @@ body {
 
   font-family: 'Lato', sans-serif;
   font-size: 1rem;
-  font-weight: 300;
+  font-weight: 400;
 }
