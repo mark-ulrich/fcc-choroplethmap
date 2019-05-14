@@ -1,0 +1,74 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #6e6e6e;
+}
+
+#chart-container {
+  margin: 3rem auto;
+}
+
+.chart {
+  margin: auto;
+  display: block;
+  box-shadow: 0 0 6px 2px #333;
+  background: white;
+}
+
+#title {
+  fill: #333;
+  font-family: 'Lato', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+}
+
+#description {
+  fill: #333;
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.legend-box {
+  stroke: #333;
+}
+
+.legend-text {
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+.cell {
+  cursor: pointer;
+}
+.cell:hover {
+  stroke: #333;
+}
+
+#tooltip {
+  position: absolute;
+
+  visibility: hidden;
+  padding: 0.4rem 1rem;
+
+  border: 1px solid #333;
+  border-radius: 4px;
+
+  background: #333;
+  color: #ddd;
+  opacity: 0.85;
+
+  text-align: center;
+  line-height: 1.5rem;
+
+  box-shadow: 0 0 6px 3px #333;
+
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+}
