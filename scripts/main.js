@@ -53,20 +53,28 @@ const makeJSONRequest = (url) => {
     xhr.open('GET', url, true);
     xhr.send();
 
-    xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+    xhr.onload = () => {
+      if (xhr.status !== 200) reject('Bad status code');
+      else resolve(JSON.parse(xhr.responseText));
+    };
   });
 };
 
-const getData = () => {
+const getData = async () => {
   const countyDataURL =
     'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json';
   const educationDataURL =
     'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json';
 
-  return Promise.all([
-    makeJSONRequest(countyDataURL),
-    makeJSONRequest(educationDataURL)
-  ]).then((data) => drawGraph(data[0], data[1]));
+  try {
+    const data = await Promise.all([
+      makeJSONRequest(countyDataURL),
+      makeJSONRequest(educationDataURL)
+    ]);
+    return drawGraph(data[0], data[1]);
+  } catch (err) {
+    return console.error(err);
+  }
 };
 
 const getFillColor = (temp) => {
